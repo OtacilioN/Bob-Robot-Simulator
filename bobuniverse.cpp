@@ -10,3 +10,21 @@
  */
  
 #include "Brasilino.h"
+
+Universe::Universe(int initialDistance, int setPoint, int friction) {
+	_initialDistance = initialDistance;
+	_setPoint = setPoint;
+	_friction = friction;
+	position = _initialDistance;
+}
+
+void Universe::move(int power) {
+	if(speed >= 0)
+    	acceleration = (power - _friction)/1000.0;
+    else
+    	acceleration = (power + _friction)/1000.0;
+    
+    
+    	
+    speed += acceleration
+}

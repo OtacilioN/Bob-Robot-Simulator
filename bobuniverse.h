@@ -11,5 +11,20 @@
  
 #ifndef bobuniverse_h
 #define bobuniverse_h
-
+class Universe {
+    public:
+        Universe(int initialDistance, int setPoint, int friction = 100);
+        void move(int power);
+        int getDistance();
+        int getSpeed();
+        
+    private
+        int _initialDistance;
+        int _setPoint;
+        int _friction;
+        int speed = 0;
+        float acceleration;
+        int status;
+        int position;
+};
 #endif
