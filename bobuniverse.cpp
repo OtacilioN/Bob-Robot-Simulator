@@ -19,12 +19,16 @@ Universe::Universe(int initialDistance, int setPoint, int friction) {
 }
 
 void Universe::move(int power) {
-	if(speed >= 0)
-    	acceleration = (power - _friction)/1000.0;
-    else
-    	acceleration = (power + _friction)/1000.0;
-    
-    
+	if(status){
+		if(speed >= 0)
+    		acceleration = (power - _friction)/1000.0;
+    	else
+    		acceleration = (power + _friction)/1000.0;
     	
-    speed += acceleration
+    	speed += acceleration;
+		position += speed;
+		
+		if(position < 0) // The robot crash into the wall
+			status = 0;
+	}
 }

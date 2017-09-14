@@ -22,9 +22,9 @@ class Universe {
         int _initialDistance;
         int _setPoint;
         int _friction;
-        int speed = 0;
+        float speed = 0;
         float acceleration;
-        int status;
-        int position;
+        int status = 1;
+        
 };
 #endif
