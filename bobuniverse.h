@@ -16,6 +16,7 @@ class Universe {
         Universe(int initialDistance, int setPoint, int friction = 100);
         int getStatus();
         void move(int power);
+        void brake();
         int getDistance();
         int getSpeed();
         int getTime();
@@ -24,11 +25,11 @@ class Universe {
         int _initialDistance;
         int _setPoint;
         int _friction;
-        float speed = 0;
+        float speed;
         float acceleration;
         float position;
-        int status = 1;
-        int seconds = 0;
+        int status;
+        int seconds;
         
 };
 #endif

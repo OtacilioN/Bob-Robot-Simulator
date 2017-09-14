@@ -19,9 +19,13 @@ int main(void){
             printf("Moving with 100 of power\n");
             myBob.move(1000);
         }
-        else{
+        else if(distance == SETPOINT){
             printf("Applying brake\n");
             myBob.brake();
+        }
+        else{
+            printf("Moving with -100 of power\n");
+            myBob.move(-1000);
         }
         distance = myBob.getDistance();
         status = myBob.getStatus();
