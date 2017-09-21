@@ -32,3 +32,9 @@ The Bob Robot Simulator is used for tests about control methods, like on-off con
 ``getSpeed()`` Returns the current speed from Bob
 
 ``getTime()`` Returns the current time in the Bob Universe, since the universe was initialized, time can be used by parameter for benchmarks
+
+## License
+
+The Bob Robot Universe is licensed under the MIT License, you have permission for Commercial use, Modification, Distribuition and Private Use. Check [license](https://github.com/OtacilioN/Bob-Robot-Simulator/blob/master/LICENSE) for more informations.
+
+Feel free to mail me at contact@otaciliomaia.com
