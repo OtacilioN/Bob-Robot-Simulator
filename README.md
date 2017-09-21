@@ -14,7 +14,7 @@ The Bob Robot Simulator is used for tests about control methods, like on-off con
 
 ## Getting Started
 
-- First, [download](https://github.com/OtacilioN/Bob-Robot-Simulator/archive/master.zip) the repository with the library. 
+- [download](https://github.com/OtacilioN/Bob-Robot-Simulator/archive/master.zip) the repository with the library. 
 - Into the folder of the repository, create a new file called agent-NAME-OF-AGENT.cpp, check the [bare-minimum agent](https://github.com/OtacilioN/Bob-Robot-Simulator/blob/master/agent-bare-minimum.cpp)
 
 ## Functions
