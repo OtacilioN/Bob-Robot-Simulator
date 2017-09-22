@@ -1,5 +1,7 @@
 # Bob Robot Simulator
 
+_A Simulator to control systems banchmarks maded in cpp with  :heart:_
+
 ## Who is bob?
 
 If you have watched [this video](https://www.youtube.com/watch?v=7BDjZYGHupE&t=115s) you already meet Bob.
