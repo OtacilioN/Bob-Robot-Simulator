@@ -28,7 +28,7 @@ int Universe::getStatus() {
 	if(position < 0) // The robot crash into the wall
 		status = -1;
 		
-	if((int)position == _setPoint && speed == 0) { // Success
+	if((int)position == _setPoint && speed < 0.1 && speed > - 0.1) { // Success
 		status = 0;
 	}
 	
@@ -37,14 +37,16 @@ int Universe::getStatus() {
 
 void Universe::move(int power) {
 	if(status > 0){
-		if(speed > 0.9)
+		if(speed > 0.09)
     		acceleration = (power - _friction)/1000.0;
-    	else if(speed < -0.9)
+    	else if(speed < -0.09)
     		acceleration = (power + _friction)/1000.0;
     	else if(power > _friction)
     		acceleration = (power - _friction)/1000.0;
     	else if(power < _friction*-1)
     		acceleration = (power + _friction)/1000.0;
+        else
+            acceleration = power/10000.0;
     	
     	speed += acceleration;
 		position -= speed;
