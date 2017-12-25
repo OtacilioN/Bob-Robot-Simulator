@@ -7,11 +7,11 @@
 #define INITIALDISTANCE 60
 #define SETPOINT 30
 #define AUTOMATICSTOP 1000
-#define GENERATIONS 5
+#define GENERATIONS 200
 #define INDIVIDUALS 40
 #define CROMO 4
 #define GENES 4
-#define KEEP (INDIVIDUALS/8)
+#define KEEP 6
 #define FLOATADJUST 10000000.0
 #define PERCENTADJUST (FLOATADJUST/10)
 #define MAXVALUE (10*FLOATADJUST)
@@ -24,12 +24,21 @@
 #define KI 2
 #define KD 3
 
-#define DEBUGLEVEL -1
+/* cross dictionary */
+#define MOTHER 0
+#define FATHER 1
+#define COUPLE 2
+
+#define DEBUGLEVEL 1
 
 void generateGens(int bobsGens[INDIVIDUALS][CROMO][GENES]);
 void getHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS]);
 int getPower(int bobsGens[INDIVIDUALS][CROMO][GENES], int individual, int error, int sum, int delta);
-
+void printPopulation(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS], int generation);
+void getCromosum(int bobsGens[INDIVIDUALS][CROMO][GENES], int cromosum[CROMO], int individual);
+void clearCromosum(int cromosum[CROMO]);
+void orderByHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS], int start, int end);
+void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS]);
 std::vector<Universe> myBob(INDIVIDUALS, Universe(INITIALDISTANCE, SETPOINT));
 
 int main(void)
@@ -42,6 +51,23 @@ int main(void)
     for(generation = 0; generation < GENERATIONS; generation++)
     {
         getHealth(bobsGens, health);
+        if(DEBUGLEVEL>1)
+            printPopulation(bobsGens, health, generation);
+        
+        orderByHealth(bobsGens, health, 0, (INDIVIDUALS-1));
+        if(DEBUGLEVEL)
+        {
+            if(DEBUGLEVEL > 1)
+                printf("\n Ordered \n");
+            printPopulation(bobsGens, health, generation);
+        }
+        
+        cross(bobsGens, health);
+        if(DEBUGLEVEL > 2)
+        {
+            printf("\n After crossing \n");
+            printPopulation(bobsGens, health, generation);
+        }
     }
 
     return 0;
@@ -133,22 +159,16 @@ void getHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS])
 int getPower(int bobsGens[INDIVIDUALS][CROMO][GENES], int individual, int error, int sum, int delta)
 {
     int cromosum[CROMO] = {0};
-    int x, y, power;
+    int power;
     float kp, ki, kd;
-
-    for(x = 0; x < CROMO; x++)
-    {
-        for(y = 0; y < GENES; y++)
-        {
-            cromosum[x] += bobsGens[individual][x][y];
-        }
-    }
-
+    
+    getCromosum(bobsGens, cromosum, individual);
+    
     kp = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
     ki = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
     kd = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
 
-    if(DEBUGLEVEL > 1)
+    if(DEBUGLEVEL > 5)
         printf("\n\n%f %f %f\n\n", kp, ki, kd);
 
     power = (error*kp) + (sum*ki) + (delta*kp);
@@ -156,4 +176,168 @@ int getPower(int bobsGens[INDIVIDUALS][CROMO][GENES], int individual, int error,
     return power;
 }
 
+void printPopulation(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS], int generation)
+{
+    int individual, genes;
+    int cromosum[CROMO] = {0};
+    float kp, ki, kd;
+    
+    printf("\n-------------- Generation %d --------------\n\n", generation);
+    for(individual = 0; individual < INDIVIDUALS; individual++)
+    {
+        printf("    --- Individual --- %d\n", individual);
+        
+        getCromosum(bobsGens, cromosum, individual);
+        kp = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
+        ki = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
+        kd = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
+        printf("    KP: %f  KI: %f  KD: %f  Health: %d\n", kp, ki, kd, health[individual]);
+        
+        clearCromosum(cromosum);
+    }
+    return ;
+}
 
+void getCromosum(int bobsGens[INDIVIDUALS][CROMO][GENES], int cromosum[CROMO], int individual)
+{
+    int cromo, gene;
+    for(cromo = 0; cromo < CROMO; cromo++)
+    {
+        for(gene = 0; gene < GENES; gene++)
+        {
+            cromosum[cromo] += bobsGens[individual][cromo][gene];
+        }
+    }
+    
+    return ;
+}
+
+void clearCromosum(int cromosum[CROMO])
+{
+    int cromo;
+    for(cromo = 0; cromo < CROMO; cromo++)
+        cromosum[cromo] = 0;
+    return ;
+} 
+
+void orderByHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS], int start, int end)
+{
+    int pivot, cromo, gene, aux, aux2[CROMO][GENES], i, j, half;
+   
+    i = start;
+    j = end;
+   
+    half = (int) ((i + j) / 2);
+    pivot = health[half];
+   
+    do{
+        while (health[i] < pivot) 
+            i = i + 1;
+        while (health[j] > pivot) 
+            j = j - 1;
+      
+        if(i <= j){
+         
+            // Saving in aux
+            aux = health[i];
+            for(cromo = 0; cromo < CROMO; cromo++)
+            {
+                for(gene = 0; gene < GENES; gene++)
+                    aux2[cromo][gene] = bobsGens[i][cromo][gene];
+             }
+         
+            // Replacing places
+            health[i] = health[j];
+            for(cromo = 0; cromo < CROMO; cromo++)
+            {
+                for(gene = 0; gene < GENES; gene++)
+                    bobsGens[i][cromo][gene] = bobsGens[j][cromo][gene];
+            }
+         
+            // Updating j with aux
+            health[j] = aux;
+            for(cromo = 0; cromo < CROMO; cromo++)
+            {
+                for(gene = 0; gene < GENES; gene++)
+                    bobsGens[j][cromo][gene] = aux2[cromo][gene];
+            }
+         
+            i = i + 1;
+            j = j - 1;
+        }
+    }while(j > i);
+   
+    if(start < j)
+        orderByHealth(bobsGens, health, start, j); 
+    if(i < end)
+        orderByHealth(bobsGens, health, i, end);
+    
+    return ;
+}
+
+void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS])
+{
+    int luck, cromo, gene, individual, match[COUPLE], accumulatedHealth[INDIVIDUALS], sons[INDIVIDUALS][CROMO][GENES], x;
+    
+    accumulatedHealth[0] = health[0];
+    for(individual = 1; individual < INDIVIDUALS; individual++)
+        accumulatedHealth[individual] = accumulatedHealth[individual-1] + health[individual];
+    
+    for(individual = 0; individual < (INDIVIDUALS-KEEP); individual++)
+    {
+        luck = rand()%accumulatedHealth[INDIVIDUALS-1];
+        for(x = INDIVIDUALS; x >= 0; x--) // > probability to came from right
+        {
+            if(luck > (accumulatedHealth[x]))
+                break;
+        }
+        match[MOTHER] = x+1;
+        
+        do
+        {
+            luck = rand()%accumulatedHealth[INDIVIDUALS-1];
+            for(x = INDIVIDUALS; x >= 0; x--) // > probability to came from right
+            {
+                if(luck > (accumulatedHealth[x]))
+                    break;
+            }
+            match[FATHER] = x+1;
+        }while(match[MOTHER] == match[FATHER]);
+        
+        if(DEBUGLEVEL > 2)
+            printf("CROSS: match found for: %d   %d\n", match[MOTHER], match[FATHER]);
+        
+        // Each couple generates 2 sons, each sons have half genes from mother and half from father for each cromo
+        for(cromo = 0; cromo < CROMO; cromo++)
+        {
+            for(gene = 0; gene < GENES/2; gene++)
+                sons[individual][cromo][gene] = bobsGens[match[MOTHER]][cromo][gene];
+            for(; gene < GENES; gene++)
+                sons[individual][cromo][gene] = bobsGens[match[FATHER]][cromo][gene];
+        }
+        
+        // Second son
+            individual++;
+        
+        for(cromo = 0; cromo < CROMO; cromo++)
+        {
+            for(gene = 0; gene < GENES/2; gene++)
+                sons[individual][cromo][gene] = bobsGens[match[FATHER]][cromo][gene];
+            for(; gene < GENES; gene++)
+                sons[individual][cromo][gene] = bobsGens[match[MOTHER]][cromo][gene];
+        }
+            
+    }
+    
+    // Generation Update
+    for(individual = 0; individual < (INDIVIDUALS-KEEP); individual++)
+    {
+        for(cromo = 0; cromo < CROMO; cromo++)
+        {
+            for(gene = 0; gene < GENES; gene++)
+                bobsGens[individual][cromo][gene] = sons[individual][cromo][gene];
+        }
+    }
+    
+    return ;
+}
