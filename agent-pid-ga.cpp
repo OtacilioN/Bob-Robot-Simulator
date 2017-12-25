@@ -7,22 +7,22 @@
 #define INITIALDISTANCE 60
 #define SETPOINT 30
 #define AUTOMATICSTOP 1000
-#define GENERATIONS 200
-#define INDIVIDUALS 40
-#define CROMO 4
+#define GENERATIONS 30
+#define INDIVIDUALS 30
+#define CROMO 3
 #define GENES 4
-#define KEEP 6
+#define KEEP 4
 #define FLOATADJUST 10000000.0
 #define PERCENTADJUST (FLOATADJUST/10)
 #define MAXVALUE (10*FLOATADJUST)
 #define KIADJUST 10.0
 #define KDADJUST 10.0
+#define KBASE 10.0
 
 /* Cromo dictionary */
-#define BASEVALUE 0
-#define KP 1
-#define KI 2
-#define KD 3
+#define KP 0
+#define KI 1
+#define KD 2
 
 /* cross dictionary */
 #define MOTHER 0
@@ -89,10 +89,7 @@ void generateGens(int bobsGens[INDIVIDUALS][CROMO][GENES])
                 bobsGens[x][y][z] = rand()%(int)(MAXVALUE/CROMO);
                 if(DEBUGLEVEL > 1)
                 {   
-                    if(!y)  
-                        printf("%f ", (bobsGens[x][y][z]/FLOATADJUST));
-                    else
-                        printf("%f ", (bobsGens[x][y][z] / PERCENTADJUST));
+                    printf("%f ", (bobsGens[x][y][z] / PERCENTADJUST));
                 }
             }
         }
@@ -164,9 +161,9 @@ int getPower(int bobsGens[INDIVIDUALS][CROMO][GENES], int individual, int error,
     
     getCromosum(bobsGens, cromosum, individual);
     
-    kp = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
-    ki = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
-    kd = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
+    kp = KBASE * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
+    ki = KBASE * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
+    kd = KBASE * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
 
     if(DEBUGLEVEL > 5)
         printf("\n\n%f %f %f\n\n", kp, ki, kd);
@@ -188,9 +185,9 @@ void printPopulation(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVID
         printf("    --- Individual --- %d\n", individual);
         
         getCromosum(bobsGens, cromosum, individual);
-        kp = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
-        ki = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
-        kd = (cromosum[BASEVALUE]/FLOATADJUST) * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
+        kp = KBASE * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
+        ki = KBASE * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
+        kd = KBASE * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
         printf("    KP: %f  KI: %f  KD: %f  Health: %d\n", kp, ki, kd, health[individual]);
         
         clearCromosum(cromosum);
@@ -286,7 +283,7 @@ void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS])
     for(individual = 0; individual < (INDIVIDUALS-KEEP); individual++)
     {
         luck = rand()%accumulatedHealth[INDIVIDUALS-1];
-        for(x = INDIVIDUALS; x >= 0; x--) // > probability to came from right
+        for(x = INDIVIDUALS-1; x >= 0; x--) // > probability to came from right
         {
             if(luck > (accumulatedHealth[x]))
                 break;
@@ -296,7 +293,7 @@ void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS])
         do
         {
             luck = rand()%accumulatedHealth[INDIVIDUALS-1];
-            for(x = INDIVIDUALS; x >= 0; x--) // > probability to came from right
+            for(x = INDIVIDUALS-1; x >= 0; x--) // > probability to came from right
             {
                 if(luck > (accumulatedHealth[x]))
                     break;
