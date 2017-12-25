@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #define DEFAULTBRAKE 4
+#define DEBUG 0
 
 Universe::Universe(int initialDistance, int setPoint, int friction) {
 	_initialDistance = initialDistance;
@@ -22,6 +23,17 @@ Universe::Universe(int initialDistance, int setPoint, int friction) {
 	speed = 0;
 	status = 1;
 	seconds = 0;
+}
+
+void Universe::restart(int initialDistance, int setPoint, int friction) { 
+	_initialDistance = initialDistance;
+	_setPoint = setPoint;
+	_friction = friction;
+	position = _initialDistance;
+	speed = 0;
+	status = 1;
+	seconds = 0;
+    return ;
 }
 
 int Universe::getStatus() {
@@ -51,8 +63,11 @@ void Universe::move(int power) {
     	speed += acceleration;
 		position -= speed;
 		seconds++;
-		printf("the acceleration: %f\n", acceleration);
-		printf("the speed: %f\n", speed);
+        if(DEBUG)
+        {
+		    printf("the acceleration: %f\n", acceleration);
+		    printf("the speed: %f\n", speed);
+        }
 		
 		getStatus();
 	}
@@ -67,6 +82,8 @@ void Universe::brake() {
 		speed -= DEFAULTBRAKE;
 	else
 		speed += DEFAULTBRAKE;
+
+    return ;
 }
 
 int Universe::getDistance() {

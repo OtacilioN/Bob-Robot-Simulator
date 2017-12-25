@@ -14,6 +14,7 @@
 class Universe {
     public:
         Universe(int initialDistance, int setPoint, int friction = 100);
+        void restart(int initialDistance, int setPoint, int friction = 100);
         int getStatus();
         void move(int power);
         void brake();
