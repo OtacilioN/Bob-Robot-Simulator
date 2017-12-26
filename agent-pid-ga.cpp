@@ -7,17 +7,18 @@
 #define INITIALDISTANCE 60
 #define SETPOINT 30
 #define AUTOMATICSTOP 1000
-#define GENERATIONS 30
+#define GENERATIONS 5000
 #define INDIVIDUALS 30
 #define CROMO 3
 #define GENES 4
-#define KEEP 4
+#define KEEP 2
 #define FLOATADJUST 10000000.0
 #define PERCENTADJUST (FLOATADJUST/10)
 #define MAXVALUE (10*FLOATADJUST)
 #define KIADJUST 10.0
 #define KDADJUST 10.0
 #define KBASE 10.0
+#define MUTATIONCHANCE 40 // 10 Means 10%
 
 /* Cromo dictionary */
 #define KP 0
@@ -29,7 +30,7 @@
 #define FATHER 1
 #define COUPLE 2
 
-#define DEBUGLEVEL 1
+#define DEBUGLEVEL 0
 
 void generateGens(int bobsGens[INDIVIDUALS][CROMO][GENES]);
 void getHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS]);
@@ -39,6 +40,9 @@ void getCromosum(int bobsGens[INDIVIDUALS][CROMO][GENES], int cromosum[CROMO], i
 void clearCromosum(int cromosum[CROMO]);
 void orderByHealth(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS], int start, int end);
 void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS]);
+void mutation(int bobsGens[INDIVIDUALS][CROMO][GENES]);
+void printbest(int health[INDIVIDUALS], int generation);
+void printgens(int bobsGens[INDIVIDUALS][CROMO][GENES]);
 std::vector<Universe> myBob(INDIVIDUALS, Universe(INITIALDISTANCE, SETPOINT));
 
 int main(void)
@@ -55,6 +59,7 @@ int main(void)
             printPopulation(bobsGens, health, generation);
         
         orderByHealth(bobsGens, health, 0, (INDIVIDUALS-1));
+        printbest(health, generation);
         if(DEBUGLEVEL)
         {
             if(DEBUGLEVEL > 1)
@@ -68,7 +73,10 @@ int main(void)
             printf("\n After crossing \n");
             printPopulation(bobsGens, health, generation);
         }
+        mutation(bobsGens);
     }
+
+    printgens(bobsGens);
 
     return 0;
 }
@@ -86,7 +94,7 @@ void generateGens(int bobsGens[INDIVIDUALS][CROMO][GENES])
                 printf("\n CROMO %d: ", y);
             for(z = 0; z < GENES; z++)
             {
-                bobsGens[x][y][z] = rand()%(int)(MAXVALUE/CROMO);
+                bobsGens[x][y][z] = rand()%(int)(MAXVALUE/GENES);
                 if(DEBUGLEVEL > 1)
                 {   
                     printf("%f ", (bobsGens[x][y][z] / PERCENTADJUST));
@@ -336,5 +344,49 @@ void cross(int bobsGens[INDIVIDUALS][CROMO][GENES], int health[INDIVIDUALS])
         }
     }
     
+    return ;
+}
+
+void mutation(int bobsGens[INDIVIDUALS][CROMO][GENES])
+{
+    int luck, individual, cromo, gene;
+
+    for(individual = 0; individual < (INDIVIDUALS-KEEP); individual++)
+    {
+        luck = rand()%100;
+        if(luck < MUTATIONCHANCE)
+        {
+            cromo = rand()%CROMO;
+            gene = rand()%GENES;
+            bobsGens[individual][cromo][gene] = rand()%(int)(MAXVALUE/GENES);
+        }   
+    }
+
+    return ;
+}
+
+void printbest(int health[INDIVIDUALS], int generation)
+{
+    int bobtime;
+    bobtime = AUTOMATICSTOP - health[INDIVIDUALS - 1];
+    printf("%d %d\n", bobtime, generation);
+    return ;
+}
+
+void printgens(int bobsGens[INDIVIDUALS][CROMO][GENES])
+{
+    int cromosum[CROMO] = {0};
+
+    float kp, ki, kd;
+
+    getCromosum(bobsGens, cromosum, INDIVIDUALS-1);
+
+
+    kp = KBASE * ((cromosum[KP]/PERCENTADJUST) / 100.0); 
+    ki = KBASE * ((cromosum[KI]/PERCENTADJUST) / (100.0*KIADJUST));
+    kd = KBASE * ((cromosum[KD]/PERCENTADJUST) / (100.0*KDADJUST));
+
+    printf("\n\n%f %f %f\n\n", kp, ki, kd);
+
     return ;
 }
