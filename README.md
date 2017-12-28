@@ -23,6 +23,8 @@ The Bob Robot Simulator is used for tests about control methods, like on-off con
 
 ``Universe(int initialDistance, int setPoint, int friction)`` Initializes Bob's universe, the param ``initialDistance`` receives a int with the initial distance from Bob to the wall, ``setPoint`` is the target distance, and ``friction`` is the main friction of the universe, 100 is the default value
 
+``restart(int initialDistance, int setPoint, int friction)`` Reinitialize the Bob's universe, with the same params of Universe constructor 
+
 ``getStatus()`` Returns the status of the simulation, 1 if is running, 0 if it was successful (stop at the setPoint), and -1 if Bob crash into the wall
 
 ``move(int power)`` Makes the robot move, positive ``power`` to forward, and negative ``power`` to backward, it is recommended to use values between -1000 and 1000 for ``power``
